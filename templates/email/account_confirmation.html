@@ -1,0 +1,20 @@
+{% extends "email/base.html" %}
+
+{% block content %}
+<br>
+Hi {{ name }}
+<br>
+<br>
+Welcome to Leva
+Please <a
+        href="{{ client_side_url }}/confirm-account/{{ token }}">activate</a> your account to be able to use its features fully.
+<br>
+<br>
+<br>
+<br>
+<br>
+Leva.com<br>
++374 55 82 82 91<br>
+info@leva.com<br>
+Leva<br>
+{% endblock %}

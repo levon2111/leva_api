@@ -1,0 +1,12 @@
+.idea
+logs/*
+media/*
+collectstatic/*
+*.pyc
+wsgi.py
+!.gitkeep
+runserver
+makemigrations
+migrate
+createsuperuser
+static/*
