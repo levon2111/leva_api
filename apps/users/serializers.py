@@ -231,3 +231,7 @@ class SyndicateGetSerializer(serializers.ModelSerializer):
 
 class EmailSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True)
+
+
+class InviteTokenSerializer(serializers.Serializer):
+    token = serializers.CharField(required=True)

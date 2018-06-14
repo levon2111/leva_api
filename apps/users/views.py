@@ -11,9 +11,9 @@ from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 
 from apps.core.utils import return_http_error, send_email_job_registration, generate_unique_key
-from apps.users.models import User, Syndicate, InvitedToSyndicate
+from apps.users.models import User, Syndicate, InvitedToSyndicate, SyndicateMember
 from apps.users.serializers import ForgotPasswordSerializer, ConfirmAccountSerializer, UserSerializer, \
-    ChangePasswordSerializer, SyndicateCreateSerializer, SyndicateGetSerializer, EmailSerializer
+    ChangePasswordSerializer, SyndicateCreateSerializer, SyndicateGetSerializer, EmailSerializer, InviteTokenSerializer
 
 
 class Login(ObtainAuthToken):
@@ -134,13 +134,24 @@ class UsersViewSet(ModelViewSet):
         )
 
 
-class SyndicateViewSet(ModelViewSet):
+class CreateSyndicateViewSet(ModelViewSet):
     def get_queryset(self):
         return Syndicate.objects.all()
 
     queryset = Syndicate.objects.all()
     serializer_class = SyndicateCreateSerializer
     http_method_names = ('post',)
+
+    @action(methods=['POST'], detail=False, permission_classes=[IsAuthenticated], serializer_class=InviteTokenSerializer)
+    def confirm_invite(self, request):
+        token = request.data['token']
+        inv = InvitedToSyndicate.objects.filter(token=token).first()
+        if inv is not None:
+            new_member = SyndicateMember(user=request.user, syndicate=inv.syndicate)
+            new_member.save()
+            inv.delete()
+            return Response({'message': 'success'}, status=status.HTTP_201_CREATED)
+        return return_http_error({'token': 'Token is invalid'}, status.HTTP_400_BAD_REQUEST)
 
     @action(methods=['POST'], detail=False, permission_classes=[IsAuthenticated],
             serializer_class=SyndicateCreateSerializer)
