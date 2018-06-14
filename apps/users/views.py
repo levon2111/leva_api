@@ -13,7 +13,8 @@ from rest_framework.viewsets import ModelViewSet
 from apps.core.utils import return_http_error, send_email_job_registration, generate_unique_key
 from apps.users.models import User, Syndicate, InvitedToSyndicate, SyndicateMember
 from apps.users.serializers import ForgotPasswordSerializer, ConfirmAccountSerializer, UserSerializer, \
-    ChangePasswordSerializer, SyndicateCreateSerializer, SyndicateGetSerializer, EmailSerializer, InviteTokenSerializer
+    ChangePasswordSerializer, SyndicateCreateSerializer, SyndicateGetSerializer, EmailSerializer, InviteTokenSerializer, \
+    SignUpSerializer
 
 
 class Login(ObtainAuthToken):
@@ -142,7 +143,8 @@ class CreateSyndicateViewSet(ModelViewSet):
     serializer_class = SyndicateCreateSerializer
     http_method_names = ('post',)
 
-    @action(methods=['POST'], detail=False, permission_classes=[IsAuthenticated], serializer_class=InviteTokenSerializer)
+    @action(methods=['POST'], detail=False, permission_classes=[IsAuthenticated],
+            serializer_class=InviteTokenSerializer)
     def confirm_invite(self, request):
         token = request.data['token']
         inv = InvitedToSyndicate.objects.filter(token=token).first()
@@ -183,3 +185,17 @@ class CreateSyndicateViewSet(ModelViewSet):
             return Response(status=status.HTTP_201_CREATED, data=SyndicateGetSerializer(syndicate_data).data)
         else:
             return return_http_error(syndicate_data.errors, status.HTTP_400_BAD_REQUEST)
+
+
+class SignUpAPIView(APIView):
+    serializer_class = SignUpSerializer
+
+    def get_serializer(self):
+        return self.serializer_class()
+
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid():
+            serializer.save_user(serializer.data)
+            return JsonResponse(serializer.data, status=status.HTTP_201_CREATED)
+        return return_http_error(serializer.errors, status.HTTP_400_BAD_REQUEST)

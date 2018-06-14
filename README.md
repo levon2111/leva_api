@@ -42,7 +42,7 @@
     cd /var/www/leva_api && pip install -r requirements/local.txt
 
     sudo chown :www-data /var/www/leva_api
-    sudo cp /var/www/car/car/wsgi_default.py /var/www/leva_api/leva_api/wsgi.py
+    sudo cp /var/www/leva_api/leva_api/wsgi_default.py /var/www/leva_api/leva_api/wsgi.py
 
 
 ##Database creation

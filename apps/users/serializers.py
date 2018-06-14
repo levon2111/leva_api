@@ -235,3 +235,39 @@ class EmailSerializer(serializers.Serializer):
 
 class InviteTokenSerializer(serializers.Serializer):
     token = serializers.CharField(required=True)
+
+
+class SignUpSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    password = serializers.CharField()
+    repeat_password = serializers.CharField()
+    first_name = serializers.CharField(
+        required=False,
+        allow_blank=True,
+    )
+    last_name = serializers.CharField(
+        required=False,
+        allow_blank=True,
+    )
+
+    @staticmethod
+    def save_user(validated_data):
+        user = User(email=validated_data['email'])
+        user.set_password(validated_data['password'])
+        user.is_staff = False
+        user.is_active = True
+        user.email_confirmation_token = generate_unique_key(user.email)
+        user.save()
+
+    def validate(self, data):
+        check_valid_password(data)
+        self.check_valid_email(data['email'])
+
+        return data
+
+    @staticmethod
+    def check_valid_email(value):
+        if User.objects.filter(email=value).exists():
+            raise serializers.ValidationError({'email': ['This email address has already exist.']})
+
+        return value
