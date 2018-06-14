@@ -148,6 +148,10 @@ class Syndicate(models.Model):
     leadership_commitment = models.IntegerField(null=False, blank=False)
     personal_note = models.TextField(null=False, blank=False)
 
+    @property
+    def get_members_count(self):
+        return SyndicateMember.objects.filter(user=self.user).count()
+
     def __str__(self):
         return self.name
 

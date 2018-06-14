@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from apps.core.utils import generate_unique_key
-from apps.users.models import User, Syndicate
+from apps.users.models import User, Syndicate, SyndicateMember
 from apps.users.validators import check_valid_password
 
 
@@ -87,6 +87,41 @@ class ChangePasswordSerializer(serializers.Serializer):
         if error:
             raise serializers.ValidationError({'password': error})
         return data
+
+
+class GetSyndicateSerializer(serializers.ModelSerializer):
+    members_count = serializers.ReadOnlyField(source='get_members_count')
+
+    class Meta:
+        model = Syndicate
+        fields = [
+            'id',
+            'user',
+            'members_count',
+            'name',
+            'description',
+            'personal_note',
+            'focus',
+            'industry',
+            'privacy',
+            'horizon',
+            'currency',
+            'capital_raised',
+            'min_commitment',
+            'leadership_commitment',
+        ]
+
+
+class SyndicateMemberSerializer(serializers.ModelSerializer):
+    syndicate = GetSyndicateSerializer(read_only=True)
+
+    class Meta:
+        model = SyndicateMember
+        fields = [
+            'id',
+            'user',
+            'syndicate',
+        ]
 
 
 class SyndicateUpdateSerializer(serializers.ModelSerializer):
