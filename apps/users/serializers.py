@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from apps.core.utils import generate_unique_key, send_email_job_registration
+from apps.core.utils import generate_unique_key
 from apps.users.models import User, Syndicate
 from apps.users.validators import check_valid_password
 
@@ -87,6 +87,25 @@ class ChangePasswordSerializer(serializers.Serializer):
         if error:
             raise serializers.ValidationError({'password': error})
         return data
+
+
+class SyndicateUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Syndicate
+        fields = [
+            'user',
+            'name',
+            'description',
+            'personal_note',
+            'focus',
+            'industry',
+            'privacy',
+            'horizon',
+            'currency',
+            'capital_raised',
+            'min_commitment',
+            'leadership_commitment',
+        ]
 
 
 class SyndicateCreateSerializer(serializers.ModelSerializer):

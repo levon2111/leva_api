@@ -14,7 +14,7 @@ from apps.core.utils import return_http_error, send_email_job_registration, gene
 from apps.users.models import User, Syndicate, InvitedToSyndicate, SyndicateMember
 from apps.users.serializers import UserSerializer, \
     ChangePasswordSerializer, SyndicateCreateSerializer, SyndicateGetSerializer, EmailSerializer, InviteTokenSerializer, \
-    SignUpSerializer
+    SignUpSerializer, SyndicateUpdateSerializer
 
 
 class Login(ObtainAuthToken):
@@ -96,8 +96,9 @@ class CreateSyndicateViewSet(ModelViewSet):
     queryset = Syndicate.objects.all()
     serializer_class = SyndicateCreateSerializer
     http_method_names = ('post',)
+    permission_classes = [IsAuthenticated, ]
 
-    @action(methods=['POST'], detail=False, permission_classes=[IsAuthenticated],
+    @action(methods=['POST'], detail=False, permission_classes=[IsAuthenticated, ],
             serializer_class=InviteTokenSerializer)
     def confirm_invite(self, request):
         token = request.data['token']
@@ -152,3 +153,23 @@ class SignUpAPIView(APIView):
             serializer.save_user(serializer.data)
             return JsonResponse(serializer.data, status=status.HTTP_201_CREATED)
         return return_http_error(serializer.errors, status.HTTP_400_BAD_REQUEST)
+
+
+class UpdateSyndicateViewSet(ModelViewSet):
+    def get_queryset(self):
+        return Syndicate.objects.all()
+
+    queryset = Syndicate.objects.all()
+    serializer_class = SyndicateUpdateSerializer
+    http_method_names = ('put', 'patch',)
+    permission_classes = [IsAuthenticated, ]
+
+    # @action(methods=['PUT', 'PATCH', ], detail=True, permission_classes=[IsAuthenticated],
+    #         serializer_class=SyndicateUpdateSerializer)
+    # def update_syndicate(self, request):
+    #     syndicate_data = SyndicateUpdateSerializer(data=request.data)
+    #     if syndicate_data.is_valid():
+    #         syndicate_data = syndicate_data.save()
+    #         return Response(status=status.HTTP_201_CREATED, data=SyndicateGetSerializer(syndicate_data).data)
+    #     else:
+    #         return return_http_error(syndicate_data.errors, status.HTTP_400_BAD_REQUEST)

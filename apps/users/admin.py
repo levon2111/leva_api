@@ -6,6 +6,7 @@ from apps.users.models import User, Syndicate, SyndicateMember, InvitedToSyndica
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
     list_display = [
+        'id',
         'username',
         'first_name',
         'last_name',
@@ -35,6 +36,7 @@ class UserAdmin(admin.ModelAdmin):
 @admin.register(Syndicate)
 class SyndicateModelAdmin(admin.ModelAdmin):
     list_display = [
+        'id',
         'user',
         'name',
         'description',
@@ -56,6 +58,7 @@ class SyndicateModelAdmin(admin.ModelAdmin):
 @admin.register(SyndicateMember)
 class SyndicateMemberModelAdmin(admin.ModelAdmin):
     list_display = [
+        'id',
         'user',
         'syndicate',
     ]
@@ -67,6 +70,7 @@ class SyndicateMemberModelAdmin(admin.ModelAdmin):
 @admin.register(InvitedToSyndicate)
 class InvitedToSyndicateModelAdmin(admin.ModelAdmin):
     list_display = [
+        'id',
         'syndicate',
         'token',
     ]

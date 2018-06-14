@@ -6,13 +6,14 @@ from rest_framework.routers import DefaultRouter
 from rest_framework_swagger.views import get_swagger_view
 
 from apps.core.urls import generate_url
-from apps.users.views import UsersViewSet, CreateSyndicateViewSet
+from apps.users.views import UsersViewSet, CreateSyndicateViewSet, UpdateSyndicateViewSet
 
 schema_view = get_swagger_view(title='Leva API')
 
 router = DefaultRouter()
 router.register(r'users', UsersViewSet, base_name='users')
 router.register(r'create-syndicate', CreateSyndicateViewSet, base_name='create-syndicate')
+router.register(r'update-syndicate', UpdateSyndicateViewSet, base_name='update-syndicate')
 
 urlpatterns = [
     url(r'^$', schema_view),
