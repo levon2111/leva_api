@@ -6,12 +6,13 @@ from rest_framework.routers import DefaultRouter
 from rest_framework_swagger.views import get_swagger_view
 
 from apps.core.urls import generate_url
-from apps.users.views import UsersViewSet
+from apps.users.views import UsersViewSet, SyndicateViewSet
 
-schema_view = get_swagger_view(title='Car.am API')
+schema_view = get_swagger_view(title='Leva API')
 
 router = DefaultRouter()
 router.register(r'users', UsersViewSet, base_name='users')
+router.register(r'syndicate', SyndicateViewSet, base_name='syndicate')
 
 urlpatterns = [
     url(r'^$', schema_view),

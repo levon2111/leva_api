@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from apps.core.utils import generate_unique_key, send_email_job_registration
-from apps.users.models import User
+from apps.users.models import User, Syndicate
 from apps.users.validators import check_valid_password
 
 
@@ -141,3 +141,93 @@ class ChangePasswordSerializer(serializers.Serializer):
         if error:
             raise serializers.ValidationError({'password': error})
         return data
+
+
+class SyndicateCreateSerializer(serializers.ModelSerializer):
+    user = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.all(),
+        required=True,
+        allow_null=False,
+    )
+    name = serializers.CharField(max_length=255, required=True)
+    description = serializers.CharField(required=True)
+    personal_note = serializers.CharField(required=True)
+    focus = serializers.ChoiceField(choices=Syndicate.FOCUS_TYPES, required=True)
+    industry = serializers.ChoiceField(choices=Syndicate.INDUSTRY_TYPES, required=True)
+    privacy = serializers.ChoiceField(choices=Syndicate.PRIVACY_TYPES, required=True)
+    horizon = serializers.ChoiceField(choices=Syndicate.HORIZON_TYPES, required=True)
+    currency = serializers.ChoiceField(choices=Syndicate.CURRENCY_TYPES, required=True)
+    capital_raised = serializers.IntegerField(required=True)
+    min_commitment = serializers.IntegerField(required=True)
+    leadership_commitment = serializers.IntegerField(required=True)
+    members_to_invite = serializers.ListField(required=False)
+
+    def validate(self, attrs):
+        if attrs['focus'] not in [x[0] for x in Syndicate.FOCUS_TYPES]:
+            raise serializers.ValidationError({'focus': 'Focus Type is not valid choice.'})
+        if attrs['industry'] not in [x[0] for x in Syndicate.INDUSTRY_TYPES]:
+            raise serializers.ValidationError({'industry': 'Focus Type is not valid choice.'})
+        if attrs['privacy'] not in [x[0] for x in Syndicate.PRIVACY_TYPES]:
+            raise serializers.ValidationError({'privacy': 'Privacy Type is not valid choice.'})
+        if attrs['horizon'] not in [x[0] for x in Syndicate.HORIZON_TYPES]:
+            raise serializers.ValidationError({'horizon': 'Horizon Type is not valid choice.'})
+        if attrs['currency'] not in [x[0] for x in Syndicate.CURRENCY_TYPES]:
+            raise serializers.ValidationError({'currency': 'Currency Type is not valid choice.'})
+
+        return attrs
+
+    class Meta:
+        model = Syndicate
+        fields = [
+            'user',
+            'members_to_invite',
+            'name',
+            'description',
+            'personal_note',
+            'focus',
+            'industry',
+            'privacy',
+            'horizon',
+            'currency',
+            'capital_raised',
+            'min_commitment',
+            'leadership_commitment',
+        ]
+
+
+class UserGetSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = [
+            'id',
+            'first_name',
+            'last_name',
+            'email',
+            'phone',
+        ]
+
+
+class SyndicateGetSerializer(serializers.ModelSerializer):
+    user = UserGetSerializer(read_only=True)
+
+    class Meta:
+        model = Syndicate
+        fields = [
+            'id',
+            'user',
+            'name',
+            'description',
+            'personal_note',
+            'focus',
+            'industry',
+            'privacy',
+            'horizon',
+            'currency',
+            'capital_raised',
+            'min_commitment',
+            'leadership_commitment',
+        ]
+
+
+class EmailSerializer(serializers.Serializer):
+    email = serializers.EmailField(required=True)

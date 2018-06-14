@@ -10,10 +10,10 @@ from rest_framework.settings import api_settings
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 
-from apps.core.utils import return_http_error
-from apps.users.models import User
+from apps.core.utils import return_http_error, send_email_job_registration, generate_unique_key
+from apps.users.models import User, Syndicate, InvitedToSyndicate
 from apps.users.serializers import ForgotPasswordSerializer, ConfirmAccountSerializer, UserSerializer, \
-    ChangePasswordSerializer
+    ChangePasswordSerializer, SyndicateCreateSerializer, SyndicateGetSerializer, EmailSerializer
 
 
 class Login(ObtainAuthToken):
@@ -132,3 +132,43 @@ class UsersViewSet(ModelViewSet):
                 'title': 'Error for Patch password',
             }
         )
+
+
+class SyndicateViewSet(ModelViewSet):
+    def get_queryset(self):
+        return Syndicate.objects.all()
+
+    queryset = Syndicate.objects.all()
+    serializer_class = SyndicateCreateSerializer
+    http_method_names = ('post',)
+
+    @action(methods=['POST'], detail=False, permission_classes=[IsAuthenticated],
+            serializer_class=SyndicateCreateSerializer)
+    def create_syndicate(self, request):
+        members_to_invite = request.data['members_to_invite']
+        request.data.pop('members_to_invite')
+        syndicate_data = SyndicateCreateSerializer(data=request.data)
+
+        if syndicate_data.is_valid():
+            syndicate_data = syndicate_data.save()
+            print(syndicate_data)
+            for member in members_to_invite:
+                valid_email = EmailSerializer(data=member)
+                if valid_email.is_valid():
+                    token = generate_unique_key(member['email'])
+                    inv = InvitedToSyndicate(token=token, syndicate=syndicate_data)
+                    inv.save()
+                    send_email_job_registration(
+                        'Leva.com',
+                        member['email'],
+                        'invite_member',
+                        {
+                            'token': token
+                        },
+                        'Member invite',
+                    )
+                else:
+                    return return_http_error(valid_email.errors, status.HTTP_400_BAD_REQUEST)
+            return Response(status=status.HTTP_201_CREATED, data=SyndicateGetSerializer(syndicate_data).data)
+        else:
+            return return_http_error(syndicate_data.errors, status.HTTP_400_BAD_REQUEST)

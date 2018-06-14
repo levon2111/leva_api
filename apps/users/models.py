@@ -87,3 +87,91 @@ class User(AbstractUser, AbstractBaseModel):
 
     class Meta:
         verbose_name_plural = 'Users'
+
+
+class Syndicate(models.Model):
+    FOCUS_TYPES = (
+        ('seed', 'Seed'),
+        ('seed1', 'Seed1'),
+        ('seed2', 'Seed2'),
+    )
+    INDUSTRY_TYPES = (
+        ('biotech', 'Biotech'),
+        ('biotech1', 'Biotech1'),
+        ('biotech2', 'Biotech2'),
+    )
+    PRIVACY_TYPES = (
+        ('public', 'Public'),
+        ('public1', 'Public1'),
+        ('public2', 'Public2'),
+    )
+    CURRENCY_TYPES = (
+        ('usd', 'USD'),
+        ('amd', 'AMD'),
+        ('eur', 'EUR'),
+        ('rub', 'RUB')
+    )
+    HORIZON_TYPES = (
+        ('3year', '<3year'),
+    )
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=False, blank=False)
+    name = models.CharField(max_length=255, null=False, blank=False)
+    description = models.TextField(null=False, blank=False)
+    focus = models.CharField(
+        choices=FOCUS_TYPES,
+        max_length=255,
+        default='seed',
+    )
+    industry = models.CharField(
+        choices=INDUSTRY_TYPES,
+        max_length=255,
+        default='biotech',
+    )
+    privacy = models.CharField(
+        choices=PRIVACY_TYPES,
+        max_length=255,
+        default='public',
+    )
+    currency = models.CharField(
+        choices=CURRENCY_TYPES,
+        max_length=255,
+        default='usd',
+    )
+    horizon = models.CharField(
+        choices=HORIZON_TYPES,
+        max_length=255,
+        default='public',
+    )
+    capital_raised = models.IntegerField(null=False, blank=False)
+    min_commitment = models.IntegerField(null=False, blank=False)
+    leadership_commitment = models.IntegerField(null=False, blank=False)
+    personal_note = models.TextField(null=False, blank=False)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name_plural = 'Syndicate'
+
+
+class SyndicateMember(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=False)
+    syndicate = models.ForeignKey(Syndicate, on_delete=models.CASCADE, null=False)
+
+    def __str__(self):
+        return str(self.pk)
+
+    class Meta:
+        verbose_name_plural = 'Syndicate Member'
+
+
+class InvitedToSyndicate(models.Model):
+    syndicate = models.ForeignKey(Syndicate, on_delete=models.CASCADE, null=False)
+    token = models.CharField(max_length=255, null=False, blank=False)
+
+    def __str__(self):
+        return self.token
+
+    class Meta:
+        verbose_name_plural = 'Invited To Syndicate'
