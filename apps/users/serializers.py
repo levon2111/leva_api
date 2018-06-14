@@ -71,60 +71,6 @@ class UserSerializer(serializers.ModelSerializer):
         return value
 
 
-class ForgotPasswordSerializer(serializers.Serializer):
-    email = serializers.EmailField()
-
-    @staticmethod
-    def send_mail(validated_data):
-        user = User.objects.get(email=validated_data['email'])
-        user.reset_key = generate_unique_key(user.email)
-
-        send_email_job_registration(
-            'Car.am',
-            user.email,
-            'reset_password',
-            {
-                'reset_key': user.reset_key,
-                'name': user.username
-            },
-            'Reset your password',
-        )
-        user.save()
-
-    def validate(self, data):
-        self.check_email(data['email'])
-        return data
-
-    @staticmethod
-    def check_email(value):
-        user = User.objects.filter(email=value)
-
-        if not user.exists():
-            raise serializers.ValidationError('This email address does not exist.')
-
-        if not user.filter(is_active=True).exists():
-            raise serializers.ValidationError('Your account is inactive.')
-
-        return value
-
-
-class ConfirmAccountSerializer(serializers.Serializer):
-    token = serializers.CharField()
-
-    @staticmethod
-    def confirm(validated_data):
-        user = User.objects.get(email_confirmation_token=validated_data['token'])
-        user.is_active = True
-        user.email_confirmation_token = None
-        user.save()
-
-    def validate(self, data):
-        if not User.objects.filter(email_confirmation_token=data['token']).exists():
-            raise serializers.ValidationError('Invalid token.')
-
-        return data
-
-
 class ChangePasswordSerializer(serializers.Serializer):
     old_password = serializers.CharField()
     password = serializers.CharField()
