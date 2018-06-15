@@ -150,7 +150,7 @@ class Syndicate(models.Model):
 
     @property
     def get_members_count(self):
-        return SyndicateMember.objects.filter(user=self.user).count()
+        return SyndicateMember.objects.filter(syndicate=self).count()
 
     def __str__(self):
         return self.name
